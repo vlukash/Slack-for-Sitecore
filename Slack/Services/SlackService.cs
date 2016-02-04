@@ -14,16 +14,16 @@ namespace Slack.Services
     {
         #region Interface Implementations
 
-        public void PublishMessage(ISlackMessage slackMessage)
+        public async void PublishMessage(ISlackMessage slackMessage)
         {
-            if (string.IsNullOrWhiteSpace(slackMessage.Token) 
+            if (string.IsNullOrWhiteSpace(slackMessage.Token)
                 || string.IsNullOrWhiteSpace(slackMessage.Channel)
                 || string.IsNullOrWhiteSpace(slackMessage.Username)
                 || string.IsNullOrWhiteSpace(slackMessage.Text))
                 return;
 
-            var slackConnector = new SlackConnector.SlackConnector();
-            var connection = slackConnector.Connect(slackMessage.Token).Result;
+            ISlackConnector slackConnector = new SlackConnector.SlackConnector();
+            ISlackConnection connection = await slackConnector.Connect(slackMessage.Token);
             var message = new BotMessage
             {
                 Text = slackMessage.Text,
@@ -34,7 +34,7 @@ namespace Slack.Services
             };
 
             // when
-            connection.Say(message).Wait();
+            await connection.Say(message);
         }
 
         public IList<Publication> GetApplicablePublications(Guid eventId)
